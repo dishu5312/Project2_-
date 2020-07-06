@@ -9,6 +9,8 @@ from werkzeug.security import generate_password_hash,check_password_hash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from models1 import *
 from models2 import *
+from models3 import *
+from models4 import *
 
 import os
 app = Flask(__name__)
@@ -98,6 +100,36 @@ def dashboard():
 def logout():
     logout_user()
     return redirect(url_for('index'))
+
+@app.route('/new',methods=['GET', 'POST'])
+@login_required
+def new():
+    form = choiceform()
+    form.hostel.choices=[(hostel.hostel,hostel.hostel) for hostel in Hostels.query.filter_by(gender=current_user.gender).all()]
+    form.type.choices=[(hotel.type,hotel.type) for hotel in Hotels.query.filter_by(name='A')]
+    form.sharing.choices=[(hotel.sharing,hotel.sharing) for hotel in Hotels.query.filter_by(name='A')]
+    if request.method == 'POST':
+        user=Choices(id=form.roll.data,hostel=form.hostel.data,type=form.type.data,sharing=form.sharing.data)
+        db.session.add(user)
+        db.session.commit()
+        
+        return '<h1> choice filled </h1>'
+    return render_template('new.html', form=form)
+
+@app.route('/new/<hostel>', methods=['GET','POST'])
+def tape(hostel):
+    hostels = Hotels.query.filter_by(name=hostel).all()
+
+    hostelarray=[]
+
+    for hostel in hostels:
+        hostelobj = {}
+        hostelobj['type'] = hostel.type
+        hostelobj['sharing'] = hostel.sharing
+        hostelarray.append(hostelobj)
+
+    return jsonify({'hostels' : hostelarray})
+
 
 if __name__ == '__main__':
     app.run(debug=True)
