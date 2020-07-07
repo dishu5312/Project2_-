@@ -49,7 +49,7 @@ def signup():
     form.hostel.choices=[(hostel.number,hostel.hostel) for hostel in Hostels.query.filter_by(gender='M').all()]
     if request.method == 'POST':
         hashed_password = generate_password_hash(form.password.data, method='sha256')
-        new_user = Users(name=form.name.data,username=form.username.data, email=form.email.data, password=hashed_password,phone=form.phone.data,gender=form.gender.data,hostel=form.hostel.data)
+        new_user = Users(name=form.name.data,username=form.username.data, email=form.email.data, password=hashed_password,phone=form.phone.data,gender=form.gender.data,hostel=form.hostel.data,roll=form.roll.data)
         db.session.add(new_user)
         db.session.commit()
 
@@ -104,16 +104,23 @@ def logout():
 @app.route('/new',methods=['GET', 'POST'])
 @login_required
 def new():
-    form = choiceform()
-    form.hostel.choices=[(hostel.hostel,hostel.hostel) for hostel in Hostels.query.filter_by(gender=current_user.gender).all()]
-    form.type.choices=[(hotel.type,hotel.type) for hotel in Hotels.query.filter_by(name='A')]
-    form.sharing.choices=[(hotel.sharing,hotel.sharing) for hotel in Hotels.query.filter_by(name='A')]
-    if request.method == 'POST':
-        user=Choices(id=form.roll.data,hostel=form.hostel.data,type=form.type.data,sharing=form.sharing.data)
-        db.session.add(user)
-        db.session.commit()
+    man = Choices.query.filter_by(id=current_user.roll).first()
+    man2 = current_user.roll
+
+    if man:
+       if man2 == man.id:
+           return '<h1> you have already filled the choices </h1>'
+    if not(man):
+        form = choiceform()
+        form.hostel.choices=[(hostel.hostel,hostel.hostel) for hostel in Hostels.query.filter_by(gender=current_user.gender).all()]
+        form.type.choices=[(hotel.type,hotel.type) for hotel in Hotels.query.filter_by(name='A')]
+        form.sharing.choices=[(hotel.sharing,hotel.sharing) for hotel in Hotels.query.filter_by(name='A')]
+        if request.method == 'POST':
+            user=Choices(id=current_user.roll,hostel=form.hostel.data,type=form.type.data,sharing=form.sharing.data)
+            db.session.add(user)
+            db.session.commit()
         
-        return '<h1> choice filled </h1>'
+            return '<h1> choice filled </h1>'
     return render_template('new.html', form=form)
 
 @app.route('/new/<hostel>', methods=['GET','POST'])
@@ -129,6 +136,22 @@ def tape(hostel):
         hostelarray.append(hostelobj)
 
     return jsonify({'hostels' : hostelarray})
+
+@app.route('/room',methods=['GET','POST'])
+@login_required
+def room():
+    man=0
+    man = Choices.query.filter_by(id=current_user.roll).first()
+    if not(man):
+        return '<h1> you need to fill the hostel choices first </h1>'
+
+    if man.sharing == 1:
+           return '<h1> you cant have room mate </h1>'
+    #elif man.sharing == 0 :
+        #return '<h1> you need to fill the hostel choices first </h1>'
+
+    
+    return '<h1>hello</h1>'
 
 
 if __name__ == '__main__':
