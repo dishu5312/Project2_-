@@ -15,11 +15,8 @@ room mate
     <form class="form-signin" method="POST" action="/room">
         <h2 class="form-signin-heading">enter your choices</h2>
         {{ form.hidden_tag() }}
-        {{ wtf.form_field(form.roommate) }}
-        {{ wtf.form_field(form.no) }}
-        {{ wtf.form_field(form.roll1) }}
-        {{ wtf.form_field(form.roll2) }}
-        {{ wtf.form_field(form.roll3) }}
+        {{ wtf.form_field(form.mate) }}
+        {{ wtf.form_field(form.number) }}
         <button class="btn btn-lg btn-primary btn-block" type="submit">SUBMIT</button>
     </form>
 </div>

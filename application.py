@@ -11,6 +11,7 @@ from models1 import *
 from models2 import *
 from models3 import *
 from models4 import *
+from models5 import *
 
 import os
 app = Flask(__name__)
@@ -149,9 +150,27 @@ def room():
            return '<h1> you cant have room mate </h1>'
     #elif man.sharing == 0 :
         #return '<h1> you need to fill the hostel choices first </h1>'
-
     
-    return '<h1>hello</h1>'
+    form=roomform()
+    can=Choices.query.filter_by(id=current_user.roll).first()
+    if form.mate.data == 'No':
+         sharingarray=[('0','0')]   
+    else:
+        if can:
+            i=can.sharing
+            sharingarray=[]
+
+            while i > 0:
+                sharingarray.append((i,i))
+                i=i-1
+            
+    form.number.choices=sharingarray
+    if request.method == 'POST':
+        choice=Room(mate=form.mate.data,number=form.number.data)
+        db.session.add(choice)
+        db.session.commit()
+    
+    return render_template('room.html',form=form)
 
 
 if __name__ == '__main__':
